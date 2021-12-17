@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import UserModel from "../model/users";
 import { JWTauth, verifyRefreshToken } from "../tools/auth-tools";
 import { Request, Response } from "express";
+import { JWTAuthMiddleware } from "../middlewares/JWTAuthMiddleware";
 const { Router } = express;
 
 const router = Router();
@@ -46,8 +47,12 @@ router.route("/login").post(async (req: Request, res: Response) => {
   }
 });
 
-router.route("/me").get(verifyRefreshToken, async (req: Request, res: Response) => {
-  
+router.route("/me").get(JWTAuthMiddleware, async (req: any, res: Response) => {
+  try {
+    res.status(200).send({ success: true, user: req.user });
+  } catch (error) {
+    res.status(404).send({ success: false, error: error });
+  }
 })
 
 router.route("/register").post(async (req: Request, res: Response) => {

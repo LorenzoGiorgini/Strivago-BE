@@ -1,8 +1,8 @@
 import express, { Router } from "express";
 import cors from "cors";
 import listEndpoints from "express-list-endpoints";
-import AccRouter from "./routes/acc";
-import DesRouter from "./routes/dest";
+import AccRouter from "./routes/accomodations";
+import DesRouter from "./routes/destinations";
 
 process.env.TS_NODE_DEV && require("dotenv").config();
 

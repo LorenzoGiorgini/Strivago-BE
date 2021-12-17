@@ -1,50 +1,60 @@
 import express from "express";
+import { AdminCheckMiddleware } from "../middlewares/AdminCheckMiddleware";
+import { JWTAuthMiddleware } from "../middlewares/JWTAuthMiddleware";
 import AccomodationSchema from "../model/accomodation";
 import DestinationSchema from "../model/destination";
-import mongoose from "mongoose";
 
-const DesRouter = express.Router();
+const { Router } = express;
 
-DesRouter.route("/")
-  .post(async (req, res) => {
+const router = Router();
+
+router
+  .route("/")
+  .post(JWTAuthMiddleware , AdminCheckMiddleware, async (req, res) => {
     try {
       const alreadyHere = await DestinationSchema.find({});
-      console.log(alreadyHere);
+      
       const foundCity = alreadyHere.find(
         (destination) => destination.city === req.body.city
       );
 
       if (foundCity) {
         res.status(400).send({ message: "City already there" });
+
       } else {
         const destination = new DestinationSchema(req.body);
+
         if (destination) {
           await destination.save();
+
           res.status(201).send(destination);
+
         } else {
           res.status(404).send({ message: "destination not found" });
+
         }
       }
     } catch (error) {
       console.log(error);
     }
   })
-  .get(async (req, res) => {
+  .get(JWTAuthMiddleware, async (req, res) => {
     try {
-      //const destinations = await DestinationSchema.find().distinct("city");
-      //const destinations = await DestinationSchema.distinct("city");
       const destinations = await DestinationSchema.find({});
       if (destinations) {
         res.status(200).send(destinations);
+
       } else {
         res.status(404).send({ message: "Accomodation not found" });
+
       }
     } catch (error) {
-      console.log(error);
+      res.status(500).send({ success: false, message: "Something went wrong" });
+
     }
   });
 
-DesRouter.route("/:cityId").get(async (req, res) => {
+router.route("/:cityId").get(JWTAuthMiddleware, AdminCheckMiddleware ,async (req, res) => {
   try {
     const accomodations = await AccomodationSchema.find({
       city: req.params.cityId,
@@ -55,30 +65,9 @@ DesRouter.route("/:cityId").get(async (req, res) => {
       res.status(404).send("Accomodation not found");
     }
   } catch (error) {
-    console.log(error);
+    res.status(500).send({ success: false, message: "Something went wrong" });
   }
 });
-export default DesRouter;
 
 
-
-destinationRouter.get("/", async (req, res, next) => {
-  try {
-    const { available } = req.query
-
-    const destination = await DestinationModel.find(
-      available
-        ? { _id: [...(await AccommodationModel.find().populate("city").distinct("city"))] }
-        : {}
-    );
-
-    if (destination) {
-      res.status(200).send(destination);
-    } else {
-      res.status(404).send();
-    }
-  } catch (error) {
-    res.status(404).send();
-    console.log();
-  }
-});
+export default router;

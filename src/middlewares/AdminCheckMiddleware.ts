@@ -1,6 +1,6 @@
 import {Request, Response, NextFunction } from 'express';
 
-export const AdminCheckMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const AdminCheckMiddleware = (req: any, res: Response, next: NextFunction) => {
     if (req.user.role === "admin") {
         next();
     } else {

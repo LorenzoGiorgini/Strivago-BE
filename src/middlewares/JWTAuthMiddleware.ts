@@ -4,7 +4,7 @@ import { verifyNormalJWT } from "../tools/auth-tools";
 import { Request, Response, NextFunction } from "express";
 
 export const JWTAuthMiddleware = async (
-  req: Request,
+  req: any,
   res: Response,
   next: NextFunction
 ) => {
@@ -27,9 +27,11 @@ export const JWTAuthMiddleware = async (
         next();
       } else {
         res.status(404).send({ success: false, message: "User not found" });
+
       }
     } catch (error) {
       res.status(401).send({ success: false, message: "Not authorized" });
+      
     }
   }
 };

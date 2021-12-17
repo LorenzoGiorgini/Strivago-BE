@@ -1,7 +1,8 @@
-import mongoose from "mongoose";
+import mongoose, { Models } from "mongoose";
 import bcrypt from "bcrypt";
 
 const { Schema, model } = mongoose;
+
 
 
 const UserModel = new Schema(
@@ -41,7 +42,7 @@ UserModel.methods.toJSON = function () {
   return user;
 };
 
-UserModel.statics.checkCredentials = async function (
+/* UserModel.statics.checkCredentials = async function (
   email: string,
   password: string
 ) {
@@ -58,6 +59,6 @@ UserModel.statics.checkCredentials = async function (
   } else {
     return null;
   }
-};
+}; */
 
 export default model("User", UserModel);

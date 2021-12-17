@@ -4,9 +4,9 @@ import server from "./server"
 
 process.env.TS_NODE_DEV && require("dotenv").config();
 
-const port = process.env.PORT || 3002
+const port = process.env.PORT || 3001
 
-mongoose.connect(process.env.MONGO_URL!)
+mongoose.connect(process.env.MONGO_CONNECTION!)
 .then(() => {
     console.log(`Connected to Mongo`);
     server.listen(port, () => {

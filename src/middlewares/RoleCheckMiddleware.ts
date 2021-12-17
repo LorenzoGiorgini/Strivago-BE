@@ -1,6 +1,6 @@
 import {Request, Response, NextFunction } from 'express';
 
-export const RoleCheckMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const RoleCheckMiddleware = (req: any, res: Response, next: NextFunction) => {
     if (req.user.role === "host") {
         next();
     } else {

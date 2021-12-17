@@ -33,21 +33,9 @@ router.route("/register").post(async (req: Request, res: Response) => {
     if (createUser) {
       await createUser.save();
 
-      const { accessToken, refreshToken } = await JWTauth(createUser);
+      const tokens = await JWTauth(createUser);
 
-      res.cookie("accessToken", accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production" ? true : false,
-        sameSite: "lax",
-      });
-
-      res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production" ? true : false,
-        sameSite: "lax",
-      });
-
-      res.status(201).send({ success: true, user: createUser._id});
+      res.status(201).send({ success: true, user: createUser._id, tokens });
     } else {
       res.status(400).send({
         success: false,
@@ -59,25 +47,19 @@ router.route("/register").post(async (req: Request, res: Response) => {
   }
 });
 
-router.route("/refreshToken").post(async (req : Request, res : Response) => {
+router.route("/refreshToken").post(async (req: Request, res: Response) => {
   try {
     const { currentRefreshToken } = req.body;
 
-    const { accessToken, refreshToken } = await verifyRefreshToken(currentRefreshToken);
+    const { accessToken, refreshToken } = await verifyRefreshToken(
+      currentRefreshToken
+    );
 
-    res.cookie("accessToken", accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production" ? true : false,
-      sameSite: "lax",
-    });
-
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production" ? true : false,
-      sameSite: "lax",
-    });
-    
+    res.status(200).send({ success: true, accessToken, refreshToken });
   } catch (error) {
     res.status(404).send({ success: false, error: error });
   }
 });
+
+
+export default router;

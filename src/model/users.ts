@@ -1,12 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 
-import IUser from "../interfaces/IUser";
 const { Schema, model } = mongoose;
-
-
-
-
 
 
 const UserModel = new Schema(

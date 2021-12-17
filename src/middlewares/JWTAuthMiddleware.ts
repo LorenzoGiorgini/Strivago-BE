@@ -1,13 +1,9 @@
-import UserModel from "../model/users";
+import { UserModel } from "../model/users";
 
 import { verifyNormalJWT } from "../tools/auth-tools";
-import { Request, Response, NextFunction } from "express";
+import { RequestHandler } from "express";
 
-export const JWTAuthMiddleware = async (
-  req: any,
-  res: Response,
-  next: NextFunction
-) => {
+export const JWTAuthMiddleware: RequestHandler = async (req, res, next) => {
   if (!req.headers.authorization) {
     res.status(401).send({
       success: false,
@@ -17,9 +13,9 @@ export const JWTAuthMiddleware = async (
     try {
       const token = req.headers.authorization.split(" ")[1];
 
-      const decodedToken: any = await verifyNormalJWT(token);
+      const decodedToken = await verifyNormalJWT(token);
 
-      const user = await UserModel.findById(decodedToken);
+      const user = await UserModel.findById(decodedToken._id);
 
       if (user) {
         req.user = user;
@@ -27,11 +23,9 @@ export const JWTAuthMiddleware = async (
         next();
       } else {
         res.status(404).send({ success: false, message: "User not found" });
-
       }
     } catch (error) {
       res.status(401).send({ success: false, message: "Not authorized" });
-      
     }
   }
 };

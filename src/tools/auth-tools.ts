@@ -1,55 +1,59 @@
 import jwt from "jsonwebtoken";
+import { Document } from "mongoose";
+import IUser from "../interfaces/IUser";
 
-import UserModel from "../model/users";
+import { UserModel } from "../model/users";
 
-
-export const JWTauth = async (user : any) => {
-  
+export const JWTauth = async (user: IUser & Document) => {
   const accessToken = await generateJWTToken({ _id: user._id });
   const refreshToken = await generateRefreshJWTToken({ _id: user._id });
 
   user.refreshToken = refreshToken;
 
-  await user.save(user);
+  await user.save();
 
   return { accessToken, refreshToken };
 };
 
-const generateJWTToken = (payload : string | {}) =>
-  new Promise((resolve, reject) =>
+const generateJWTToken = (payload: StrivagoJwt) =>
+  new Promise<string>((resolve, reject) =>
     jwt.sign(
       payload,
       process.env.JWT_SECRET!,
       { expiresIn: "15m" },
       (err, token) => {
         if (err) reject(err);
-        else resolve(token);
+        else resolve(token!);
       }
     )
   );
 
-const generateRefreshJWTToken = (payload : string | {}) =>
-  new Promise((resolve, reject) =>
+const generateRefreshJWTToken = (payload: StrivagoJwt) =>
+  new Promise<string>((resolve, reject) =>
     jwt.sign(
       payload,
       process.env.JWT_REFRESH_SECRET!,
       { expiresIn: "1 week" },
       (err, token) => {
         if (err) reject(err);
-        else resolve(token);
+        else resolve(token!);
       }
     )
   );
 
-export const verifyNormalJWT = (token : string) =>
-  new Promise((resolve, reject) =>
+type StrivagoJwt = {
+  _id: string;
+};
+
+export const verifyNormalJWT = (token: string) =>
+  new Promise<StrivagoJwt>((resolve, reject) =>
     jwt.verify(token, process.env.JWT_SECRET!, (err, decodedToken) => {
       if (err) reject(err);
-      else resolve(decodedToken);
+      else resolve(decodedToken as StrivagoJwt);
     })
   );
 
-export const verifyRefreshJWT = (token : string) =>
+export const verifyRefreshJWT = (token: string) =>
   new Promise((resolve, reject) =>
     jwt.verify(token, process.env.JWT_REFRESH_SECRET!, (err, decodedToken) => {
       if (err) reject(err);
@@ -57,9 +61,8 @@ export const verifyRefreshJWT = (token : string) =>
     })
   );
 
-export const verifyRefreshToken = async (currentRefreshToken : string) => {
-
-  const decodedRefreshToken : any = await verifyRefreshJWT(currentRefreshToken);
+export const verifyRefreshToken = async (currentRefreshToken: string) => {
+  const decodedRefreshToken: any = await verifyRefreshJWT(currentRefreshToken);
 
   const user = await UserModel.findById(decodedRefreshToken._id);
 

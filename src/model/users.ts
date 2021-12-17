@@ -1,11 +1,14 @@
-import mongoose, { Models } from "mongoose";
+import mongoose, { Document, Model, Models } from "mongoose";
 import bcrypt from "bcrypt";
+import IUser from "../interfaces/IUser";
 
 const { Schema, model } = mongoose;
 
+interface UserModel extends Model<IUser> {
+  checkCredentials(email: string, password: string): Promise<IUser & Document | null>;
+}
 
-
-const UserModel = new Schema(
+const UserSchema = new Schema<IUser>(
   {
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
@@ -17,7 +20,7 @@ const UserModel = new Schema(
   }
 );
 
-UserModel.pre("save", async function (next) {
+UserSchema.pre("save", async function (next) {
   const newUser = this;
 
   const password = newUser.password;
@@ -30,7 +33,7 @@ UserModel.pre("save", async function (next) {
   next();
 });
 
-UserModel.methods.toJSON = function () {
+UserSchema.methods.toJSON = function () {
   const userDocument = this;
 
   const user = userDocument.toObject();
@@ -42,7 +45,7 @@ UserModel.methods.toJSON = function () {
   return user;
 };
 
-/* UserModel.statics.checkCredentials = async function (
+UserSchema.statics.checkCredentials = async function (
   email: string,
   password: string
 ) {
@@ -59,6 +62,6 @@ UserModel.methods.toJSON = function () {
   } else {
     return null;
   }
-}; */
+};
 
-export default model("User", UserModel);
+export const UserModel = model<IUser, UserModel>("User", UserSchema);
